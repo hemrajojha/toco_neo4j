@@ -26,6 +26,7 @@ CREATE (h:Host {
 });
 
 
+//Create Connections
 MATCH (ap:WiFiAccessPoint {id: "wifi20"}), (sta:WiFiUserEquipment {id: "sta1"})
 CREATE (ap)-[:`net:STATIONS_IN_RANGE`]->(sta);
 
@@ -36,6 +37,7 @@ MATCH (assoc:WiFiAssociation {id: "sta1_ap"}), (h:Host {id: "h1"})
 CREATE (assoc)-[:`net:TO`]->(h);
 
 
+//Display Network
 MATCH (ap:WiFiAccessPoint)-[:`net:STATIONS_IN_RANGE`]->(sta:WiFiUserEquipment)
 OPTIONAL MATCH (sta)-[:`net:CONNECTED_TO`]->(assoc:WiFiAssociation)
 OPTIONAL MATCH (assoc)-[:`net:TO`]->(host:Host)
@@ -68,6 +70,7 @@ CREATE (assoc:LiFiAssociation {
 });
 
 
+//Create Connections
 MATCH (ap:LiFiAccessPoint {id: "LiFi1"}), (sta:LiFiUserEquipment {id: "sta2"})
 CREATE (ap)-[:`net:STATIONS_IN_RANGE`]->(sta);
 
@@ -75,13 +78,14 @@ MATCH (sta:LiFiUserEquipment {id: "sta2"}), (assoc:LiFiAssociation {id: "sta2_ap
 CREATE (sta)-[:`net:HAS_ASSOCIATION`]->(assoc);
 
 
+//Display Network
 MATCH (ap:LiFiAccessPoint)-[:`net:STATIONS_IN_RANGE`]->(sta:LiFiUserEquipment)
 OPTIONAL MATCH (sta)-[:`net:HAS_ASSOCIATION`]->(assoc:LiFiAssociation)
 RETURN ap, sta, assoc;
 
 
 
-//Wired Network Example
+//Create Wired Network Points
 CREATE (s:Switch { id: "s1" });
 CREATE (h:Host { id: "h1" });
 
@@ -95,6 +99,7 @@ CREATE (h_if:Interface {
 CREATE (link:WiredLink { id: "s1_h1", bandwidth: 50.0 });
 
 
+//Create Connections
 MATCH (s:Switch {id: "s1"}), (s_if:Interface {id: "s1_eth1"})
 CREATE (s)-[:`net:HAS_INTERFACE`]->(s_if);
 
@@ -105,7 +110,6 @@ MATCH (s_if:Interface {id: "s1_eth1"}), (link:WiredLink {id: "s1_h1"})
 CREATE (s_if)-[:`net:HAS_LINK`]->(link);
 
 
-//remove abundant nodes
 //remove redundant nodes
 MATCH (h:Host {id: "h1"})-[r:`net:HAS_INTERFACE`]->(h_if:Interface {id: "h1-eth0"})
 WITH r ORDER BY id(r)
@@ -117,13 +121,13 @@ CALL {
 }
 RETURN 'Cleaned';
 
-
+//Display Network
 MATCH (s:Switch)-[:`net:HAS_INTERFACE`]->(i:Interface)-[:`net:HAS_LINK`]->(l:WiredLink)
 OPTIONAL MATCH (h:Host)-[:`net:HAS_INTERFACE`]->(j:Interface)
 RETURN s, i, j, l, h;
 
 
-//SDN Flow Example
+//Create SDN Flow
 CREATE (flow:Flow {
   id: "s1_flow1",
   idleTimeout: 0,
@@ -138,6 +142,7 @@ CREATE (action:Output { id: "s1_flow1_action0" });
 CREATE (port:Port { id: "s1_port1" });
 
 
+//Create Connections
 MATCH (s:Switch {id: "s1"}), (flow:Flow {id: "s1_flow1"})
 CREATE (s)-[:`net:HAS_FLOW`]->(flow);
 
@@ -148,6 +153,7 @@ MATCH (action:Output {id: "s1_flow1_action0"}), (port:Port {id: "s1_port1"})
 CREATE (action)-[:`net:TO_PORT`]->(port);
 
 
+//Display Network
 MATCH (s:Switch)-[:`net:HAS_FLOW`]->(f:Flow)-[:`net:HAS_ACTION`]->(a:Output)-[:`net:TO_PORT`]->(p:Port)
 RETURN s, f, a, p;
 
